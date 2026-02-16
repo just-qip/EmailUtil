@@ -10,10 +10,26 @@ repositories {
 }
 
 dependencies {
+    // Добавлена зависимость для работы с javax.mail
+    implementation 'com.sun.mail:javax.mail:1.6.2'
+
     testImplementation platform('org.junit:junit-bom:5.9.1')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 }
 
 test {
     useJUnitPlatform()
+}
+
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Main-Class': 'org.example.Main'
+    }
+    archiveClassifier = 'fat'
+    from sourceSets.main.output
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE  // ← добавляем эту строку
 }
